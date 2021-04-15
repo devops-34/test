@@ -1,55 +1,29 @@
 pipeline {
     agent any
+    parameters {
+        string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?')
+
+        text(name: 'BIOGRAPHY', defaultValue: '', description: 'Enter some information about the person')
+
+        booleanParam(name: 'TOGGLE', defaultValue: true, description: 'Toggle this value')
+
+        choice(name: 'CHOICE', choices: ['One', 'Two', 'Three'], description: 'Pick something')
+
+        password(name: 'PASSWORD', defaultValue: 'SECRET', description: 'Enter a password')
+    }
     stages {
-        stage('compile') {
-			steps {
-                echo 'compiling..'
-				git url: 'https://github.com/lerndevops/DevOpsClassCodes'
-				bat label: '', script: 'mvn compile'
+        stage('Example') {
+            steps {
+                echo "Hello ${params.PERSON}"
+
+                echo "Biography: ${params.BIOGRAPHY}"
+
+                echo "Toggle: ${params.TOGGLE}"
+
+                echo "Choice: ${params.CHOICE}"
+
+                echo "Password: ${params.PASSWORD}"
             }
-        }
-        stage('codereview-pmd') {
-			steps {
-                echo 'codereview..'
-				bat label: '', script: 'mvn -P metrics pmd:pmd'
-            }
-			post {
-                success {
-                    pmd canComputeNew: false, defaultEncoding: '', healthy: '', pattern: '**/pmd.xml', unHealthy: ''
-                }
-            }
-			
-        }
-        stage('unit-test') {
-			steps {
-                echo 'codereview..'
-				bat label: '', script: 'mvn test'
-            }
-			post {
-                success {
-                    junit 'target/surefire-reports/*.xml'
-                }
-            }
-			
-        }
-        stage('metric-check') {
-			steps {
-                echo 'unit test..'
-				bat label: '', script: 'mvn cobertura:cobertura -Dcobertura.report.format=xml'
-            }
-			post {
-                success {
-				cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'target/site/cobertura/coverage.xml', conditionalCoverageTargets: '70, 0, 0', failUnhealthy: false, failUnstable: false, lineCoverageTargets: '80, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '80, 0, 0', onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false                  
-                }
-            }
-			
-        }
-        stage('package') {
-			steps {
-                echo 'metric-check..'
-				bat label: '', script: 'mvn package'	
-            }
-			
         }
     }
 }
